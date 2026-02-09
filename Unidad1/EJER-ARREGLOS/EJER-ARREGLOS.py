@@ -1,4 +1,4 @@
-#  DATOS BASE
+#DATOS BASE
 
 meses = [
     "Enero", "Febrero", "Marzo", "Abril",
@@ -23,7 +23,7 @@ ventas = [
     [20000,15000,14000]
 ]
 
-#  MÉTODOS
+#MÉTODOS
 
 def mostrar_tabla():
     print("------------------------------------------------------------")
@@ -37,35 +37,47 @@ def mostrar_tabla():
 
 
 def insertar_venta():
-    mes = input("Mes: ")
-    departamento = input("Departamento: ")
-    monto = float(input("Monto de la venta: "))
+    try:
+        mes = input("Mes: ").capitalize()
+        departamento = input("Departamento: ").capitalize()
+        monto = float(input("Monto de la venta: "))
 
-    fila = meses.index(mes)
-    columna = departamentos.index(departamento)
-    ventas[fila][columna] = monto
-    print("Venta insertada correctamente.")
+        fila = meses.index(mes)
+        columna = departamentos.index(departamento)
+
+        ventas[fila][columna] = monto
+        print("Venta insertada correctamente.")
+    except ValueError:
+        print("Error: mes, departamento o monto inválido.")
 
 
 def buscar_venta():
-    mes = input("Mes: ")
-    departamento = input("Departamento: ")
+    try:
+        mes = input("Mes: ").capitalize()
+        departamento = input("Departamento: ").capitalize()
 
-    fila = meses.index(mes)
-    columna = departamentos.index(departamento)
-    print("Venta encontrada:", ventas[fila][columna])
+        fila = meses.index(mes)
+        columna = departamentos.index(departamento)
+
+        print("Venta encontrada:", ventas[fila][columna])
+    except ValueError:
+        print("Error: mes o departamento inválido.")
 
 
 def eliminar_venta():
-    mes = input("Mes: ")
-    departamento = input("Departamento: ")
+    try:
+        mes = input("Mes: ").capitalize()
+        departamento = input("Departamento: ").capitalize()
 
-    fila = meses.index(mes)
-    columna = departamentos.index(departamento)
-    ventas[fila][columna] = 0
-    print("Venta eliminada correctamente.")
+        fila = meses.index(mes)
+        columna = departamentos.index(departamento)
 
-# MENÚ 
+        ventas[fila][columna] = 0
+        print("Venta eliminada correctamente.")
+    except ValueError:
+        print("Error: mes o departamento inválido.")
+
+# MENÚ
 
 while True:
     print("\nMENÚ")
