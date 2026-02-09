@@ -1,4 +1,4 @@
-# ================== DATOS BASE ==================
+#  DATOS BASE
 
 meses = [
     "Enero", "Febrero", "Marzo", "Abril",
@@ -23,7 +23,7 @@ ventas = [
     [20000,15000,14000]
 ]
 
-# ================== MÉTODOS ==================
+#  MÉTODOS
 
 def mostrar_tabla():
     print("------------------------------------------------------------")
@@ -65,7 +65,7 @@ def eliminar_venta():
     ventas[fila][columna] = 0
     print("Venta eliminada correctamente.")
 
-# ================== MENÚ ==================
+# MENÚ 
 
 while True:
     print("\nMENÚ")
