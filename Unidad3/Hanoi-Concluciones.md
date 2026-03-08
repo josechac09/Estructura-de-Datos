@@ -3,7 +3,7 @@
 Este proyecto es un **simulador visual de la Torre de Hanoi** desarrollado en **Python usando Tkinter**.  
 Permite observar cómo funciona el algoritmo recursivo moviendo los discos entre tres torres, además de mostrar el número de movimientos y el tiempo de ejecución.
 
----
+
 
 ## Métodos utilizados en el programa
 
@@ -33,7 +33,7 @@ El programa utiliza **8 métodos principales**:
 - **reset()**  
   Reinicia la simulación y vuelve al estado inicial.
 
----
+
 
 ## Pruebas de ejecución
 
@@ -59,7 +59,7 @@ Resultados obtenidos al ejecutar el programa:
   Movimientos mínimos: 18,446,744,073,709,551,615  
   Resolver completamente el problema tomaría millones de años.
 
----
+
 
 ## Conclusiones
 
