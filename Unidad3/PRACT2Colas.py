@@ -1,4 +1,3 @@
-
 class Order:
     def __init__(self, qtty, customer):
         self.customer = customer
