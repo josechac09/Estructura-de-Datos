@@ -1,13 +1,8 @@
-class Order:
 
+class Order:
     def __init__(self, qtty, customer):
         self.customer = customer
         self.qtty = qtty
-
-    def print(self):
-        print("     Customer:", self.customer)
-        print("     Quantity:", self.qtty)
-        print("     ------------")
 
     def getQtty(self):
         return self.qtty
@@ -15,8 +10,11 @@ class Order:
     def getCustomer(self):
         return self.customer
 
-class Node:
+    def __str__(self):
+        return f"{self.customer} ({self.qtty})"
 
+
+class Node:
     def __init__(self, info):
         self.info = info
         self.next = None
@@ -31,133 +29,116 @@ class Node:
         return self.info
 
 class Queue:
-
     def __init__(self):
         self.top = None
         self.tail = None
         self.count = 0
 
-    
-    def size(self):
-        return self.count
-
     def isEmpty(self):
         return self.count == 0
 
     def front(self):
-
         if self.isEmpty():
             return None
-
         return self.top.getInfo()
 
     def enqueue(self, info):
-
         newNode = Node(info)
-
         if self.isEmpty():
             self.top = newNode
             self.tail = newNode
         else:
             self.tail.setNext(newNode)
             self.tail = newNode
-
         self.count += 1
 
     def dequeue(self):
-
         if self.isEmpty():
             return None
-
         temp = self.top
         self.top = self.top.getNext()
-
         self.count -= 1
-
         if self.top is None:
             self.tail = None
-
         return temp.getInfo()
 
-    def printInfo(self):
-
-        print("\n********* QUEUE DUMP *********")
-        print("   Size:", self.size())
-
+    def getAll(self):
         node = self.top
-        i = 1
-
-        while node != None:
-
-            print("   ** Element", i)
-
-            order = node.getInfo()
-            order.print()
-
+        data = []
+        while node:
+            data.append(node.getInfo())
             node = node.getNext()
-            i += 1
-
-        print("******************************")
-
-    def getNth(self, pos):
-
-        if pos <= 0 or pos > self.size():
-            return None
-
-        node = self.top
-        i = 1
-
-        while node != None:
-
-            if i == pos:
-                return node.getInfo()
-
-            node = node.getNext()
-            i += 1
-
-        return None
+        return data
 
 
+# -----------------------------
+# Programa principal con historial
+# -----------------------------
 def main():
-
     queue = Queue()
+    history = []
 
-    order1 = Order(20, "cust1")
-    order2 = Order(30, "cust2")
-    order3 = Order(40, "cust3")
-    order4 = Order(50, "cust4")
+    while True:
+        print("\n===== MENU =====")
+        print("1. Agregar pedido")
+        print("2. Eliminar pedido")
+        print("3. Mostrar cola actual")
+        print("4. Ver primer pedido")
+        print("5. Mostrar historial")
+        print("6. Salir")
 
-    print("Insertando pedidos...")
-    queue.enqueue(order1)
-    queue.printInfo()
+        op = input("Seleccione una opción: ")
 
-    queue.enqueue(order2)
-    queue.printInfo()
+        if op == "1":
+            customer = input("Nombre del cliente: ")
+            qtty = input("Cantidad: ")
+            if customer == "" or qtty == "":
+                print("Ingrese todos los datos")
+                continue
+            order = Order(int(qtty), customer)
+            queue.enqueue(order)
+            history.append(f"Pedido agregado -> {order}")
+            print(f"Pedido agregado: {order}")
 
-    queue.enqueue(order3)
-    queue.printInfo()
+        elif op == "2":
+            removed = queue.dequeue()
+            if removed:
+                history.append(f"Pedido atendido -> {removed}")
+                print(f"Pedido eliminado: {removed}")
+            else:
+                print("La cola está vacía")
 
-    queue.enqueue(order4)
-    queue.printInfo()
+        elif op == "3":
+            orders = queue.getAll()
+            if not orders:
+                print("La cola está vacía")
+            else:
+                print("Cola actual:")
+                for i, o in enumerate(orders, 1):
+                    print(f"{i}. {o}")
 
-    print("\nPrimer elemento (front):")
-    front = queue.front()
-    if front:
-        front.print()
+        elif op == "4":
+            front = queue.front()
+            if front:
+                print(f"Primer pedido: {front}")
+            else:
+                print("La cola está vacía")
 
-    print("\nEliminando primer elemento (dequeue):")
-    removed = queue.dequeue()
-    if removed:
-        removed.print()
+        elif op == "5":
+            if not history:
+                print("Historial vacío")
+            else:
+                print("Historial de operaciones:")
+                for h in history:
+                    print(h)
 
-    queue.printInfo()
+        elif op == "6":
+            print("Saliendo...")
+            break
 
-    print("\nObteniendo el 3er elemento:")
-    third = queue.getNth(3)
+        else:
+            print("Opción no válida")
 
-    if third:
-        third.print()
-    else:
-        print("Posición no válida")
 
-main()
+if __name__ == "__main__":
+    main()
