@@ -52,32 +52,32 @@ Lista global donde se almacenan todos los postres.
 ###  Mostrar ingredientes
 Permite visualizar los ingredientes de un postre.
 
-- ✔ Si existe → muestra ingredientes  
-- ❌ Si no existe → error  
+-  Si existe → muestra ingredientes  
+-  Si no existe → error  
 
 ---
 
 ###  Agregar ingrediente
 Agrega un ingrediente a un postre existente.
 
-- ✔ Postre válido → se agrega  
-- ❌ Postre inexistente → error  
+-  Postre válido → se agrega  
+-  Postre inexistente → error  
 
 ---
 
 ###  Eliminar ingrediente
 Elimina un ingrediente específico.
 
-- ✔ Existe → eliminado  
-- ❌ No existe → error  
+-  Existe → eliminado  
+-  No existe → error  
 
 ---
 
 ###  Agregar postre
 Crea un nuevo postre.
 
-- ✔ Se agrega y se ordena  
-- ❌ (Programa 1) evita duplicados  
+-  Se agrega y se ordena  
+-  (Programa 1) evita duplicados  
 
 ---
 
