@@ -7,9 +7,6 @@ ALTO = 400
 VELOCIDAD = 200
 
 
-# =========================
-# SHELL SORT
-# =========================
 def shell_sort(arr, draw):
     n = len(arr)
     gap = n // 2
@@ -29,9 +26,6 @@ def shell_sort(arr, draw):
         gap //= 2
 
 
-# =========================
-# QUICK SORT
-# =========================
 def quick_sort(arr, low, high, draw):
     if low < high:
         pi = yield from partition(arr, low, high, draw)
@@ -57,9 +51,6 @@ def partition(arr, low, high, draw):
     return i + 1
 
 
-# =========================
-# HEAP SORT
-# =========================
 def heapify(arr, n, i, draw):
     largest = i
     l = 2 * i + 1
@@ -91,27 +82,21 @@ def heap_sort(arr, draw):
         yield from heapify(arr, i, 0, draw)
 
 
-# =========================
-# RADIX SORT (CLÁSICO)
-# =========================
 def counting_sort(arr, exp, draw):
     n = len(arr)
     output = [0] * n
     count = [0] * 10
 
-    # contar dígitos
     for i in range(n):
         index = (arr[i] // exp) % 10
         count[index] += 1
         draw(arr, [i])
         yield
 
-    # acumulado
     for i in range(1, 10):
         count[i] += count[i - 1]
         yield
 
-    # construir salida (estable)
     i = n - 1
     while i >= 0:
         index = (arr[i] // exp) % 10
@@ -122,7 +107,6 @@ def counting_sort(arr, exp, draw):
         yield
         i -= 1
 
-    # copiar al arreglo original
     for i in range(n):
         arr[i] = output[i]
         draw(arr, [i])
@@ -144,9 +128,6 @@ def radix_sort(arr, draw):
         exp *= 10
 
 
-# =========================
-# INTERFAZ
-# =========================
 class App:
     def __init__(self, root):
         self.root = root
@@ -180,9 +161,6 @@ class App:
         tk.Button(root, text="Generar Aleatorios", command=self.generar).pack()
         tk.Button(root, text="Salir", command=root.quit).pack(pady=10)
 
-    # =========================
-    # DIBUJAR
-    # =========================
     def draw(self, arr, highlight):
         self.canvas.delete("all")
 
@@ -205,9 +183,6 @@ class App:
 
         self.root.update_idletasks()
 
-    # =========================
-    # OBTENER DATOS
-    # =========================
     def obtener_datos(self):
         try:
             cant = int(self.entry_cant.get())
@@ -222,9 +197,6 @@ class App:
             messagebox.showerror("Error", "Datos inválidos")
             return None
 
-    # =========================
-    # INICIAR
-    # =========================
     def iniciar(self, tipo):
         self.data = self.obtener_datos()
         if not self.data:
@@ -247,9 +219,6 @@ class App:
 
         self.animar(gen)
 
-    # =========================
-    # ANIMACIÓN
-    # =========================
     def animar(self, gen):
         try:
             next(gen)
@@ -257,9 +226,6 @@ class App:
         except StopIteration:
             self.draw(self.data, [])
 
-    # =========================
-    # GENERAR ALEATORIOS
-    # =========================
     def generar(self):
         cant = random.randint(5, 15)
         nums = [random.randint(1, 100) for _ in range(cant)]
@@ -273,9 +239,6 @@ class App:
         self.draw(nums, [])
 
 
-# =========================
-# MAIN
-# =========================
 root = tk.Tk()
 app = App(root)
 root.mainloop()
