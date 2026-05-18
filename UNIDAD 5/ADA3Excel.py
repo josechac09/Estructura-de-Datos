@@ -1,776 +1,983 @@
 import tkinter as tk
-from tkinter import ttk, filedialog, messagebox
-import json
-import csv
+from tkinter import ttk, messagebox, filedialog
 import time
-
-
-
-archivo1_datos = []
-archivo2_datos = []
-
-
-def leer_archivo(ruta):
-
-    datos = []
-
-   
-    if ruta.endswith(".txt"):
-
-        with open(ruta, "r") as f:
-            contenido = f.read()
-
-        contenido = contenido.replace("\n", ",")
-
-        datos = list(
-            map(
-                int,
-                filter(None, contenido.split(","))
-            )
-        )
-
-    elif ruta.endswith(".csv"):
-
-        with open(ruta, newline='') as f:
-
-            lector = csv.reader(f)
-
-            for fila in lector:
-
-                for valor in fila:
-
-                    if valor.strip() != "":
-                        datos.append(int(valor))
-
-  
-    elif ruta.endswith(".json"):
-
-        with open(ruta, "r") as f:
-            datos = json.load(f)
-
-    return datos
-
-def filtrar_datos(datos):
-
-    texto = entrada_filtro.get().strip()
-
-    # Si no escribe nada
-    if texto == "":
-        return datos
-
-    try:
-
-        numeros = list(
-            map(
-                int,
-                texto.split(",")
-            )
-        )
-
-        filtrados = []
-
-        for n in datos:
-
-            if n in numeros:
-                filtrados.append(n)
-
-        return filtrados
-
-    except:
-
-        messagebox.showerror(
-            "Error",
-            "Filtro inválido\nEjemplo correcto: 1000,2000,3000"
-        )
-
-        return []
-
-def cargar_archivo1():
-
-    global archivo1_datos
-
-    ruta = filedialog.askopenfilename(
-        title="Seleccionar Archivo 1",
-        filetypes=[
-            ("TXT", "*.txt"),
-            ("CSV", "*.csv"),
-            ("JSON", "*.json")
-        ]
-    )
-
-    if not ruta:
-        return
-
-    try:
-
-        datos = leer_archivo(ruta)
-
-        datos = filtrar_datos(datos)
-
-        archivo1_datos = sorted(datos)
-
-        entrada1.delete(0, tk.END)
-
-        entrada1.insert(
-            0,
-            ",".join(map(str, archivo1_datos))
-        )
-
-        messagebox.showinfo(
-            "Archivo 1",
-            "Archivo 1 cargado correctamente"
-        )
-
-    except Exception as e:
-
-        messagebox.showerror(
-            "Error",
-            f"No se pudo cargar el archivo 1\n{e}"
-        )
-
-
-def cargar_archivo2():
-
-    global archivo2_datos
-
-    ruta = filedialog.askopenfilename(
-        title="Seleccionar Archivo 2",
-        filetypes=[
-            ("TXT", "*.txt"),
-            ("CSV", "*.csv"),
-            ("JSON", "*.json")
-        ]
-    )
-
-    if not ruta:
-        return
-
-    try:
-
-        datos = leer_archivo(ruta)
-
-        datos = filtrar_datos(datos)
-
-        archivo2_datos = sorted(datos)
-
-        entrada2.delete(0, tk.END)
-
-        entrada2.insert(
-            0,
-            ",".join(map(str, archivo2_datos))
-        )
-
-        messagebox.showinfo(
-            "Archivo 2",
-            "Archivo 2 cargado correctamente"
-        )
-
-    except Exception as e:
-
-        messagebox.showerror(
-            "Error",
-            f"No se pudo cargar el archivo 2\n{e}"
-        )
-
-def guardar_resultado(datos):
-
-    archivo = filedialog.asksaveasfilename(
-        defaultextension=".txt",
-        filetypes=[
-            ("TXT", "*.txt")
-        ]
-    )
-
-    if archivo:
-
-        with open(archivo, "w") as f:
-            f.write(str(datos))
-
-        messagebox.showinfo(
-            "Guardado",
-            "Resultado guardado correctamente"
-        )
-
-def dibujar(datos, color="skyblue"):
-
-    canvas.delete("all")
-
-    if not datos:
-        return
-
-    ancho_canvas = 950
-    alto_canvas = 300
-
-    ancho_barra = ancho_canvas / len(datos)
-
-    maximo = max(datos)
-
-    if maximo == 0:
-        maximo = 1
-
-    for i, valor in enumerate(datos):
-
-        x1 = i * ancho_barra
-
-        y1 = alto_canvas - (
-            (valor / maximo) * 250
-        )
-
-        x2 = (i + 1) * ancho_barra - 5
-        y2 = alto_canvas
-
-        canvas.create_rectangle(
-            x1,
-            y1,
-            x2,
-            y2,
-            fill=color
-        )
-
-        canvas.create_text(
-            x1 + ancho_barra / 2 - 5,
-            y1 - 10,
-            text=str(valor),
-            font=("Arial", 10, "bold")
-        )
-
-    ventana.update()
-    time.sleep(0.4)
-
-# ==========================================
-# INTERCALACIÓN
-# ==========================================
-
-def intercalacion_real():
-
-    resultado.delete(1.0, tk.END)
-
-    # ==========================================
-    # SI SOLO HAY ARCHIVO 1
-    # ==========================================
-
-    if archivo1_datos and not archivo2_datos:
-
-        resultado.insert(
-            tk.END,
-            "=========== INTERCALACIÓN SIMPLE ===========\n\n"
-        )
-
-        resultado.insert(
-            tk.END,
-            "Solo se cargó un archivo.\n"
-        )
-
-        resultado.insert(
-            tk.END,
-            "Se trabajará únicamente con el apartado seleccionado.\n\n"
-        )
-
-        datos = sorted(archivo1_datos)
-
-        resultado.insert(
-            tk.END,
-            f"Datos:\n{datos}\n"
-        )
-
-        dibujar(datos, "blue")
-
-        guardar_resultado(datos)
-
-        return
-
-    # ==========================================
-    # SI FALTAN LOS DOS
-    # ==========================================
-
-    if not archivo1_datos or not archivo2_datos:
-
-        messagebox.showerror(
-            "Error",
-            "Debe cargar al menos un archivo"
-        )
-
-        return
-
-    lista1 = archivo1_datos
-    lista2 = archivo2_datos
-
-    resultado.insert(
-        tk.END,
-        "=========== INTERCALACIÓN ===========\n\n"
-    )
-
-    resultado.insert(
-        tk.END,
-        f"Archivo 1:\n{lista1}\n\n"
-    )
-
-    resultado.insert(
-        tk.END,
-        f"Archivo 2:\n{lista2}\n\n"
-    )
-
-    i = 0
-    j = 0
-
-    fusion = []
-
-    while i < len(lista1) and j < len(lista2):
-
-        resultado.insert(
-            tk.END,
-            f"Comparando {lista1[i]} y {lista2[j]}\n"
-        )
-
-        if lista1[i] < lista2[j]:
-
-            fusion.append(lista1[i])
-
-            resultado.insert(
-                tk.END,
-                f"Se agrega {lista1[i]} del Archivo 1\n\n"
-            )
-
+import random
+import os
+import json
+import pandas as pd
+
+TEMAS = {
+
+    "Midnight": {
+        "bg": "#0F172A",
+        "bg2": "#1E293B",
+        "bg3": "#334155",
+        "accent": "#38BDF8",
+        "text": "#F8FAFC",
+        "bar": "#0EA5E9",
+        "bar_active": "#F43F5E",
+        "bar_done": "#22C55E"
+    },
+
+    "Lavanda": {
+        "bg": "#2B1B3F",
+        "bg2": "#3D2C5A",
+        "bg3": "#5B4B8A",
+        "accent": "#C084FC",
+        "text": "#F3E8FF",
+        "bar": "#8B5CF6",
+        "bar_active": "#F472B6",
+        "bar_done": "#34D399"
+    },
+
+    "Aurora": {
+        "bg": "#051923",
+        "bg2": "#003554",
+        "bg3": "#006494",
+        "accent": "#00A6FB",
+        "text": "#E0FBFC",
+        "bar": "#0582CA",
+        "bar_active": "#FFB703",
+        "bar_done": "#8ECAE6"
+    },
+
+    "RetroWave": {
+        "bg": "#1A1A2E",
+        "bg2": "#16213E",
+        "bg3": "#0F3460",
+        "accent": "#E94560",
+        "text": "#F1F1F1",
+        "bar": "#533483",
+        "bar_active": "#FFD369",
+        "bar_done": "#00ADB5"
+    }
+}
+
+FONT_TIT = ("Montserrat", 20, "bold")
+FONT_BTN = ("Poppins", 10, "bold")
+FONT_SM = ("Poppins", 9)
+
+# ==========================================================
+# LÓGICA DE ALGORITMOS
+# ==========================================================
+
+def intercalacion_pasos(a, b):
+    pasos, resultado = [], []
+    i = j = 0
+    a_sort, b_sort = sorted(a), sorted(b)
+
+    while i < len(a_sort) and j < len(b_sort):
+        pasos.append(("cmp", list(resultado), i, j))
+
+        if a_sort[i] <= b_sort[j]:
+            resultado.append(a_sort[i])
             i += 1
-
         else:
-
-            fusion.append(lista2[j])
-
-            resultado.insert(
-                tk.END,
-                f"Se agrega {lista2[j]} del Archivo 2\n\n"
-            )
-
+            resultado.append(b_sort[j])
             j += 1
 
-        dibujar(fusion, "lightgreen")
+        pasos.append(("add", list(resultado), i, j))
 
-    while i < len(lista1):
-
-        fusion.append(lista1[i])
-
-        resultado.insert(
-            tk.END,
-            f"Se agrega restante {lista1[i]} del Archivo 1\n"
-        )
-
+    while i < len(a_sort):
+        resultado.append(a_sort[i])
         i += 1
+        pasos.append(("add", list(resultado), i, j))
 
-        dibujar(fusion, "green")
+    while j < len(b_sort):
+        resultado.append(b_sort[j])
+        j += 1
+        pasos.append(("add", list(resultado), i, j))
 
-    while j < len(lista2):
+    return resultado, pasos
 
-        fusion.append(lista2[j])
 
-        resultado.insert(
-            tk.END,
-            f"Se agrega restante {lista2[j]} del Archivo 2\n"
+def mezcla_directa_pasos(lista):
+
+    pasos = []
+
+    def merge_sort(a):
+        if len(a) <= 1:
+            return a
+
+        m = len(a) // 2
+
+        L = merge_sort(a[:m])
+        R = merge_sort(a[m:])
+
+        return merge(L, R)
+
+    def merge(L, R):
+
+        res = []
+        i = j = 0
+
+        while i < len(L) and j < len(R):
+
+            if L[i] <= R[j]:
+                res.append(L[i])
+                i += 1
+            else:
+                res.append(R[j])
+                j += 1
+
+            pasos.append(list(res) + L[i:] + R[j:])
+
+        res += L[i:] + R[j:]
+        pasos.append(list(res))
+
+        return res
+
+    resultado = merge_sort(list(lista))
+
+    return resultado, pasos
+
+
+def mezcla_equilibrada_pasos(lista, k=3):
+
+    pasos = []
+
+    sublistas = [[] for _ in range(k)]
+
+    for idx, el in enumerate(lista):
+        sublistas[idx % k].append(el)
+
+    sublistas = [sorted(s) for s in sublistas if s]
+
+    pasos.append(("split", [item for s in sublistas for item in s]))
+
+    def merge2(a, b):
+
+        res = []
+        i = j = 0
+
+        while i < len(a) and j < len(b):
+
+            if a[i] <= b[j]:
+                res.append(a[i])
+                i += 1
+            else:
+                res.append(b[j])
+                j += 1
+
+        return res + a[i:] + b[j:]
+
+    while len(sublistas) > 1:
+
+        nueva = []
+
+        for i in range(0, len(sublistas), 2):
+
+            if i + 1 < len(sublistas):
+                nueva.append(merge2(sublistas[i], sublistas[i + 1]))
+            else:
+                nueva.append(sublistas[i])
+
+        sublistas = nueva
+
+        pasos.append(
+            (
+                "merge",
+                sublistas[0]
+                if len(sublistas) == 1
+                else [x for s in sublistas for x in s]
+            )
         )
 
-        j += 1
+    return sublistas[0], pasos
 
-        dibujar(fusion, "green")
 
-    resultado.insert(
-        tk.END,
-        "\n=========== RESULTADO FINAL ===========\n"
-    )
+# ==========================================================
+# APLICACIÓN PRINCIPAL
+# ==========================================================
 
-    resultado.insert(
-        tk.END,
-        f"{fusion}\n"
-    )
+class OrdenamientoApp:
 
-    dibujar(fusion, "blue")
+    def __init__(self, root):
 
-    guardar_resultado(fusion)
+        self.root = root
 
-# ==========================================
-# MEZCLA DIRECTA
-# ==========================================
+        self.root.title("Metodo de Ordenamineto Externa")
+        self.root.geometry("1200x820")
+        self.root.resizable(False, False)
 
-def fusionar(izquierda, derecha):
+        self.tema_actual = "Midnight"
+        self.c = TEMAS[self.tema_actual]
 
-    resultado_local = []
+        self.animando = False
+        self.datos_actuales = []
+        self.metodo_actual = "directa"
 
-    i = 0
-    j = 0
+        self.widgets_tema = []
 
-    while i < len(izquierda) and j < len(derecha):
+        self._build_ui()
+        self._aplicar_tema(self.tema_actual)
+        self._generar_aleatorios()
 
-        if izquierda[i] < derecha[j]:
+    # ======================================================
 
-            resultado_local.append(izquierda[i])
-            i += 1
+    def _reg_w(self, widget, t_bg="bg", t_fg="text"):
+        self.widgets_tema.append((widget, t_bg, t_fg))
+        return widget
+
+    # ======================================================
+
+    def _build_ui(self):
+
+        # HEADER
+
+        self.hdr = self._reg_w(
+            tk.Frame(
+                self.root,
+                pady=15
+            )
+        )
+
+        self.hdr.pack(fill="x")
+
+        self.lbl_main = self._reg_w(
+            tk.Label(
+                self.hdr,
+                text="◆ Metodo de Ordenamineto Externa ◆",
+                font=("Montserrat", 22, "bold"),
+                pady=10
+            ),
+            "bg",
+            "accent"
+        )
+
+        self.lbl_main.pack()
+
+        # CUERPO
+
+        body = self._reg_w(tk.Frame(self.root))
+        body.pack(fill="both", expand=True, padx=18, pady=10)
+
+        # SIDEBAR
+
+        side = self._reg_w(
+            tk.Frame(
+                body,
+                width=300
+            ),
+            "bg2"
+        )
+
+        side.pack(side="left", fill="y", padx=(0, 15))
+        side.pack_propagate(False)
+
+        # ==================================================
+        # CONFIGURACIÓN
+        # ==================================================
+
+        self._reg_w(
+            tk.Label(
+                side,
+                text="⚙ PANEL DE CONTROL",
+                font=("Montserrat", 11, "bold")
+            )
+        ).pack(pady=(15, 8))
+
+        frame_configs = self._reg_w(
+            tk.Frame(side),
+            "bg2"
+        )
+
+        frame_configs.pack(fill="x", padx=15)
+
+        # Tema
+
+        self._reg_w(
+            tk.Label(frame_configs, text="Tema:", font=FONT_SM)
+        ).grid(row=0, column=0, sticky="w")
+
+        self.combo_tema = ttk.Combobox(
+            frame_configs,
+            values=list(TEMAS.keys()),
+            state="readonly",
+            width=16
+        )
+
+        self.combo_tema.set(self.tema_actual)
+
+        self.combo_tema.bind(
+            "<<ComboboxSelected>>",
+            lambda e: self._aplicar_tema(self.combo_tema.get())
+        )
+
+        self.combo_tema.grid(row=0, column=1, pady=4)
+
+        # K
+
+        self._reg_w(
+            tk.Label(frame_configs, text="Vías:", font=FONT_SM)
+        ).grid(row=1, column=0, sticky="w")
+
+        self.spin_k = tk.Spinbox(
+            frame_configs,
+            from_=2,
+            to=10,
+            width=6
+        )
+
+        self.spin_k.delete(0, "end")
+        self.spin_k.insert(0, "3")
+
+        self.spin_k.grid(row=1, column=1, sticky="w", pady=4)
+
+        # Tipo de dato
+
+        self._reg_w(
+            tk.Label(frame_configs, text="Extraer:", font=FONT_SM)
+        ).grid(row=2, column=0, sticky="w")
+
+        self.combo_tipo_dato = ttk.Combobox(
+            frame_configs,
+            values=["Automático", "Solo Números", "Solo Texto"],
+            state="readonly",
+            width=16
+        )
+
+        self.combo_tipo_dato.set("Automático")
+        self.combo_tipo_dato.grid(row=2, column=1, pady=4)
+
+        # ==================================================
+        # MÉTODOS
+        # ==================================================
+
+        self._reg_w(
+            tk.Label(
+                side,
+                text="🧠 ALGORITMOS",
+                font=("Montserrat", 11, "bold")
+            )
+        ).pack(pady=(20, 8))
+
+        self.btn_metodos = {}
+
+        for label, key in [
+
+            ("Intercalación", "intercalacion"),
+            ("Mezcla Directa", "directa"),
+            ("Mezcla Equilibrada", "equilibrada")
+
+        ]:
+
+            btn = tk.Button(
+                side,
+                text=label,
+                font=FONT_BTN,
+                bd=0,
+                pady=10,
+                cursor="hand2",
+                relief="flat",
+                command=lambda k=key: self._sel_metodo(k)
+            )
+
+            btn.pack(fill="x", padx=15, pady=4)
+
+            self.widgets_tema.append((btn, "bg3", "text"))
+
+            self.btn_metodos[key] = btn
+
+        # ==================================================
+        # DATOS
+        # ==================================================
+
+        self._reg_w(
+            tk.Label(
+                side,
+                text="📂 DATOS",
+                font=("Montserrat", 11, "bold")
+            )
+        ).pack(pady=(20, 8))
+
+        botones = [
+
+            ("🎲 Generar Aleatorios", self._generar_aleatorios),
+            ("📂 Cargar Archivo", self._cargar_archivo),
+            ("💾 Guardar Resultados", self._guardar_archivo)
+
+        ]
+
+        for texto, comando in botones:
+
+            btn = tk.Button(
+                side,
+                text=texto,
+                font=FONT_BTN,
+                bd=0,
+                pady=10,
+                cursor="hand2",
+                relief="flat",
+                command=comando
+            )
+
+            btn.pack(fill="x", padx=15, pady=4)
+
+            self.widgets_tema.append((btn, "bg3", "text"))
+
+        # ==================================================
+        # VELOCIDAD
+        # ==================================================
+
+        self._reg_w(
+            tk.Label(
+                side,
+                text="⚡ VELOCIDAD",
+                font=("Montserrat", 11, "bold")
+            )
+        ).pack(pady=(20, 8))
+
+        self.vel_slider = tk.Scale(
+            side,
+            from_=0.01,
+            to=1.0,
+            resolution=0.05,
+            orient="horizontal",
+            bd=0,
+            highlightthickness=0
+        )
+
+        self.vel_slider.set(0.2)
+
+        self.vel_slider.pack(fill="x", padx=15)
+
+        self.widgets_tema.append((self.vel_slider, "bg2", "text"))
+
+        # BOTÓN EJECUTAR
+
+        self.btn_run = tk.Button(
+            side,
+            text="🚀 EJECUTAR PROCESO",
+            font=("Poppins", 11, "bold"),
+            bd=0,
+            pady=14,
+            cursor="hand2",
+            relief="flat",
+            command=self._ejecutar
+        )
+
+        self.btn_run.pack(fill="x", padx=15, pady=25)
+
+        self.widgets_tema.append((self.btn_run, "accent", "bg"))
+
+        # ==================================================
+        # ÁREA PRINCIPAL
+        # ==================================================
+
+        main = self._reg_w(tk.Frame(body))
+        main.pack(side="left", fill="both", expand=True)
+
+        self.lbl_titulo = self._reg_w(
+            tk.Label(
+                main,
+                text="Sistema listo para procesar datos...",
+                font=("Poppins", 12, "bold"),
+                anchor="w",
+                pady=10
+            ),
+            "bg",
+            "accent"
+        )
+
+        self.lbl_titulo.pack(fill="x")
+
+        # CANVAS
+
+        self.canvas = tk.Canvas(
+            main,
+            height=350,
+            highlightthickness=0,
+            bd=0
+        )
+
+        self.canvas.pack(fill="x", pady=8)
+
+        # LOG
+
+        self.log = tk.Text(
+            main,
+            font=("JetBrains Mono", 10),
+            bd=0,
+            padx=14,
+            pady=14,
+            insertbackground="white"
+        )
+
+        self.log.pack(fill="both", expand=True)
+
+        self.widgets_tema.append((self.log, "bg2", "text"))
+
+    # ======================================================
+
+    def _aplicar_tema(self, nombre_tema):
+
+        self.tema_actual = nombre_tema
+        self.c = TEMAS[nombre_tema]
+
+        self.root.configure(bg=self.c["bg"])
+        self.canvas.configure(bg=self.c["bg2"])
+
+        for widget, t_bg, t_fg in self.widgets_tema:
+
+            try:
+
+                widget.configure(
+                    bg=self.c[t_bg],
+                    fg=self.c[t_fg]
+                )
+
+                if isinstance(widget, tk.Button):
+
+                    widget.configure(
+                        activebackground=self.c["accent"],
+                        activeforeground=self.c["bg"],
+                        relief="flat"
+                    )
+
+                if isinstance(widget, tk.Scale):
+
+                    widget.configure(
+                        troughcolor=self.c["bg3"]
+                    )
+
+            except:
+                pass
+
+        self._sel_metodo(self.metodo_actual)
+        self._dibujar(self.datos_actuales)
+
+    # ======================================================
+
+    def _sel_metodo(self, metodo):
+
+        self.metodo_actual = metodo
+
+        for k, b in self.btn_metodos.items():
+
+            b.configure(
+
+                bg=self.c["accent"] if k == metodo else self.c["bg3"],
+
+                fg=self.c["bg"] if k == metodo else self.c["text"]
+
+            )
+
+        tipo = type(self.datos_actuales[0]).__name__ if self.datos_actuales else "Desconocido"
+
+        self.lbl_titulo.config(
+            text=f"ALGORITMO: {self.metodo_actual.upper()}   |   Tipo: {tipo}   |   Elementos: {len(self.datos_actuales)}"
+        )
+
+    # ======================================================
+
+    def _generar_aleatorios(self):
+
+        preferencia = self.combo_tipo_dato.get()
+
+        if preferencia == "Solo Números":
+            opcion = "numeros"
+
+        elif preferencia == "Solo Texto":
+            opcion = "texto"
+
+        else:
+            opcion = random.choice(["numeros", "texto"])
+
+        if opcion == "numeros":
+
+            self.datos_actuales = [
+                random.randint(1, 100)
+                for _ in range(20)
+            ]
 
         else:
 
-            resultado_local.append(derecha[j])
-            j += 1
+            palabras = [
+                "Python", "Java", "C++", "Ruby",
+                "Rust", "Go", "Perl", "Lua",
+                "Swift", "PHP", "Dart",
+                "Kotlin", "Scala", "R"
+            ]
 
-    resultado_local.extend(izquierda[i:])
-    resultado_local.extend(derecha[j:])
+            self.datos_actuales = [
+                random.choice(palabras)
+                for _ in range(15)
+            ]
 
-    resultado.insert(
-        tk.END,
-        f"Mezcla: {resultado_local}\n"
-    )
+        self._log_msg(f"Datos aleatorios generados ({opcion}).")
 
-    dibujar(resultado_local, "orange")
+        self._sel_metodo(self.metodo_actual)
 
-    return resultado_local
+        self._dibujar(self.datos_actuales)
 
-def merge_sort(lista):
+    # ======================================================
 
-    if len(lista) <= 1:
-        return lista
+    def _procesar_y_filtrar_datos(self, raw_data):
 
-    medio = len(lista) // 2
+        numeros = []
+        textos = []
 
-    izquierda = merge_sort(lista[:medio])
-    derecha = merge_sort(lista[medio:])
+        for item in raw_data:
 
-    return fusionar(izquierda, derecha)
+            if pd.isna(item) or item == "":
+                continue
 
-def mezcla_directa():
+            try:
 
-    resultado.delete(1.0, tk.END)
-
-    if not archivo1_datos:
-
-        messagebox.showerror(
-            "Error",
-            "Debe cargar el Archivo 1"
-        )
-
-        return
-
-    resultado.insert(
-        tk.END,
-        "=========== MEZCLA DIRECTA ===========\n\n"
-    )
-
-    resultado.insert(
-        tk.END,
-        f"Datos originales:\n{archivo1_datos}\n\n"
-    )
-
-    ordenado = merge_sort(archivo1_datos)
-
-    resultado.insert(
-        tk.END,
-        f"\nResultado Final:\n{ordenado}\n"
-    )
-
-    dibujar(ordenado, "red")
-
-    guardar_resultado(ordenado)
-
-# ==========================================
-# MEZCLA EQUILIBRADA
-# ==========================================
-
-def mezcla_equilibrada():
-
-    resultado.delete(1.0, tk.END)
-
-    if not archivo1_datos:
-
-        messagebox.showerror(
-            "Error",
-            "Debe cargar el Archivo 1"
-        )
-
-        return
-
-    resultado.insert(
-        tk.END,
-        "=========== MEZCLA EQUILIBRADA ===========\n\n"
-    )
-
-    bloques = [[x] for x in archivo1_datos]
-
-    while len(bloques) > 1:
-
-        nuevos = []
-
-        for i in range(0, len(bloques), 2):
-
-            if i + 1 < len(bloques):
-
-                fusion = sorted(
-                    bloques[i] + bloques[i + 1]
+                numeros.append(
+                    float(item)
+                    if '.' in str(item)
+                    else int(item)
                 )
 
-                resultado.insert(
-                    tk.END,
-                    f"{bloques[i]} + {bloques[i+1]} -> {fusion}\n"
+            except ValueError:
+
+                textos.append(str(item).strip())
+
+        preferencia = self.combo_tipo_dato.get()
+
+        if preferencia == "Solo Números":
+
+            if not numeros:
+                raise ValueError("No se encontraron números.")
+
+            return numeros
+
+        elif preferencia == "Solo Texto":
+
+            if not textos:
+                raise ValueError("No se encontraron textos.")
+
+            return textos
+
+        else:
+
+            if len(numeros) >= len(textos) and numeros:
+                return numeros
+
+            elif textos:
+                return textos
+
+            return []
+
+    # ======================================================
+
+    def _cargar_archivo(self):
+
+        ruta = filedialog.askopenfilename(
+            filetypes=[
+                ("Todos soportados", "*.txt *.xlsx *.xls *.json")
+            ]
+        )
+
+        if not ruta:
+            return
+
+        try:
+
+            raw = []
+
+            ext = os.path.splitext(ruta)[1].lower()
+
+            if ext in ['.xlsx', '.xls']:
+
+                df = pd.read_excel(ruta, header=None)
+
+                raw = df.values.flatten().tolist()
+
+            elif ext == '.json':
+
+                with open(ruta, 'r', encoding='utf-8') as f:
+
+                    data = json.load(f)
+
+                    raw = data if isinstance(data, list) else list(data.values())
+
+            elif ext == '.txt':
+
+                with open(ruta, 'r', encoding='utf-8') as f:
+
+                    for line in f:
+                        raw.extend(line.replace(',', ' ').split())
+
+            datos_limpios = self._procesar_y_filtrar_datos(raw)
+
+            if not datos_limpios:
+                raise ValueError("Archivo vacío.")
+
+            self.datos_actuales = datos_limpios
+
+            self._sel_metodo(self.metodo_actual)
+
+            self._dibujar(self.datos_actuales)
+
+            messagebox.showinfo(
+                "Éxito",
+                f"Datos cargados desde {os.path.basename(ruta)}"
+            )
+
+        except Exception as e:
+
+            messagebox.showerror(
+                "Error",
+                f"Error al procesar archivo:\n{e}"
+            )
+
+    # ======================================================
+
+    def _guardar_archivo(self):
+
+        if not self.datos_actuales:
+
+            messagebox.showwarning(
+                "Atención",
+                "No hay datos para guardar."
+            )
+
+            return
+
+        ruta = filedialog.asksaveasfilename(
+
+            defaultextension=".txt",
+
+            filetypes=[
+                ("JSON", "*.json"),
+                ("Excel", "*.xlsx"),
+                ("Texto", "*.txt")
+            ]
+        )
+
+        if not ruta:
+            return
+
+        try:
+
+            ext = os.path.splitext(ruta)[1].lower()
+
+            if ext == '.json':
+
+                with open(ruta, 'w', encoding='utf-8') as f:
+                    json.dump(self.datos_actuales, f)
+
+            elif ext == '.xlsx':
+
+                pd.DataFrame(self.datos_actuales).to_excel(
+                    ruta,
+                    index=False,
+                    header=False
                 )
-
-                nuevos.append(fusion)
-
-                dibujar(fusion, "purple")
 
             else:
 
-                nuevos.append(bloques[i])
+                with open(ruta, 'w', encoding='utf-8') as f:
+                    f.write(", ".join(map(str, self.datos_actuales)))
 
-        bloques = nuevos
+            self._log_msg(f"Archivo guardado en: {ruta}")
 
-    resultado.insert(
-        tk.END,
-        f"\nResultado Final:\n{bloques[0]}\n"
-    )
+            messagebox.showinfo(
+                "Guardado",
+                "Resultados exportados con éxito."
+            )
 
-    dibujar(bloques[0], "blue")
+        except Exception as e:
 
-    guardar_resultado(bloques[0])
+            messagebox.showerror(
+                "Error",
+                f"Error al guardar:\n{e}"
+            )
 
-# ==========================================
-# EJECUTAR
-# ==========================================
+    # ======================================================
 
-def ejecutar():
+    def _dibujar(self, valores, activos=[], listos=[]):
 
-    opcion = combo.get()
+        self.canvas.delete("all")
 
-    if opcion == "Intercalación":
-        intercalacion_real()
+        if not valores:
+            return
 
-    elif opcion == "Mezcla Directa":
-        mezcla_directa()
+        W = int(self.canvas.winfo_width() or 800)
+        H = int(self.canvas.winfo_height() or 350)
 
-    elif opcion == "Mezcla Equilibrada":
-        mezcla_equilibrada()
+        n = len(valores)
 
-# ==========================================
-# VENTANA PRINCIPAL
-# ==========================================
+        ancho = min((W - 40) / n, 80)
 
-ventana = tk.Tk()
+        valores_unicos = sorted(list(set(valores)))
 
-ventana.title(
-    "Métodos de Ordenamiento Externo"
-)
+        for i, v in enumerate(valores):
 
-ventana.geometry("1200x900")
+            rank = valores_unicos.index(v) + 1
 
-ventana.configure(
-    bg="#202124"
-)
+            h = (
+                (rank / len(valores_unicos)) * (H - 60)
+                if valores_unicos
+                else 100
+            )
 
-# ==========================================
-# TÍTULO
-# ==========================================
+            x1 = 20 + i * ancho
+            y1 = H - 30 - h
 
-titulo = tk.Label(
-    ventana,
-    text="Métodos de Ordenamiento Externo",
-    font=("Arial", 24, "bold"),
-    bg="#202124",
-    fg="white"
-)
+            x2 = x1 + ancho - 4
+            y2 = H - 30
 
-titulo.pack(pady=20)
+            color = (
 
-# ==========================================
-# FRAME SUPERIOR
-# ==========================================
+                self.c["bar_done"]
 
-top = tk.Frame(
-    ventana,
-    bg="#202124"
-)
+                if i in listos
 
-top.pack(pady=10)
+                else (
 
-# ==========================================
-# ENTRADA ARCHIVO 1
-# ==========================================
+                    self.c["bar_active"]
 
-entrada1 = tk.Entry(
-    top,
-    width=45,
-    font=("Arial", 11)
-)
+                    if i in activos
 
-entrada1.grid(
-    row=0,
-    column=0,
-    padx=5
-)
+                    else self.c["bar"]
 
-# ==========================================
-# BOTÓN ARCHIVO 1
-# ==========================================
+                )
+            )
 
-btn1 = tk.Button(
-    top,
-    text="Cargar Archivo 1",
-    command=cargar_archivo1,
-    bg="#2196F3",
-    fg="white",
-    font=("Arial", 11, "bold")
-)
+            self.canvas.create_rectangle(
+                x1,
+                y1,
+                x2,
+                y2,
+                fill=color,
+                outline=""
+            )
 
-btn1.grid(
-    row=0,
-    column=1,
-    padx=5
-)
+            text_disp = str(v)
 
-# ==========================================
-# ENTRADA ARCHIVO 2
-# ==========================================
+            if len(text_disp) > 8:
+                text_disp = text_disp[:6] + ".."
 
-entrada2 = tk.Entry(
-    top,
-    width=45,
-    font=("Arial", 11)
-)
+            self.canvas.create_text(
+                x1 + ancho / 2,
+                y1 - 15,
+                text=text_disp,
+                fill=self.c["text"],
+                font=("Poppins", 8, "bold"),
+                angle=0 if type(v) != str else 45
+            )
 
-entrada2.grid(
-    row=1,
-    column=0,
-    padx=5,
-    pady=10
-)
+    # ======================================================
 
-# ==========================================
-# BOTÓN ARCHIVO 2
-# ==========================================
+    def _log_msg(self, msg):
 
-btn2 = tk.Button(
-    top,
-    text="Cargar Archivo 2",
-    command=cargar_archivo2,
-    bg="#FF9800",
-    fg="white",
-    font=("Arial", 11, "bold")
-)
+        self.log.insert(
+            tk.END,
+            f"[{time.strftime('%H:%M:%S')}] {msg}\n"
+        )
 
-btn2.grid(
-    row=1,
-    column=1,
-    padx=5
-)
+        self.log.see(tk.END)
 
-# ==========================================
-# FILTRO
-# ==========================================
+    # ======================================================
 
-label_filtro = tk.Label(
-    ventana,
-    text="Filtro (ejemplo: 1000,2000,3000)",
-    bg="#202124",
-    fg="white",
-    font=("Arial", 12, "bold")
-)
+    def _ejecutar(self):
 
-label_filtro.pack(pady=5)
+        if self.animando or not self.datos_actuales:
+            return
 
-entrada_filtro = tk.Entry(
-    ventana,
-    width=50,
-    font=("Arial", 12)
-)
+        self.animando = True
 
-entrada_filtro.pack(pady=5)
+        delay = self.vel_slider.get()
 
-# ==========================================
-# COMBOBOX
-# ==========================================
+        m = self.metodo_actual
 
-combo = ttk.Combobox(
-    ventana,
-    values=[
-        "Intercalación",
-        "Mezcla Directa",
-        "Mezcla Equilibrada"
-    ],
-    state="readonly",
-    width=30,
-    font=("Arial", 11)
-)
+        self.log.delete("1.0", tk.END)
 
-combo.pack(pady=10)
+        try:
 
-combo.current(0)
+            if m == "intercalacion":
 
-# ==========================================
-# BOTÓN EJECUTAR
-# ==========================================
+                mitad = len(self.datos_actuales) // 2
 
-btn_ejecutar = tk.Button(
-    ventana,
-    text="Ejecutar Método",
-    command=ejecutar,
-    bg="#4CAF50",
-    fg="white",
-    font=("Arial", 14, "bold")
-)
+                a = self.datos_actuales[:mitad]
+                b = self.datos_actuales[mitad:]
 
-btn_ejecutar.pack(pady=15)
+                self._log_msg(
+                    f"Intercalando listas ({len(a)} y {len(b)})..."
+                )
 
-# ==========================================
-# CANVAS
-# ==========================================
+                res, pasos = intercalacion_pasos(a, b)
 
-canvas = tk.Canvas(
-    ventana,
-    width=950,
-    height=300,
-    bg="white"
-)
+                for p in pasos:
 
-canvas.pack(pady=20)
+                    self._dibujar(
+                        a + b,
+                        activos=[p[2], len(a) + p[3]]
+                    )
 
-# ==========================================
-# FRAME TEXTO
-# ==========================================
+                    self.root.update()
 
-frame_texto = tk.Frame(
-    ventana
-)
+                    time.sleep(delay)
 
-frame_texto.pack()
+                self.datos_actuales = res
 
-# ==========================================
-# SCROLLBAR
-# ==========================================
+            elif m == "directa":
 
-scroll = tk.Scrollbar(
-    frame_texto
-)
+                self._log_msg("Ejecutando Mezcla Directa...")
 
-scroll.pack(
-    side=tk.RIGHT,
-    fill=tk.Y
-)
+                res, pasos = mezcla_directa_pasos(self.datos_actuales)
 
-# ==========================================
-# RESULTADO
-# ==========================================
+                for p in pasos:
 
-resultado = tk.Text(
-    frame_texto,
-    width=130,
-    height=18,
-    font=("Consolas", 11),
-    yscrollcommand=scroll.set
-)
+                    self._dibujar(p)
 
-resultado.pack(
-    side=tk.LEFT
-)
+                    self.root.update()
 
-scroll.config(
-    command=resultado.yview
-)
+                    time.sleep(delay)
 
-# ==========================================
-# INICIAR
-# ==========================================
+                self.datos_actuales = res
 
-ventana.mainloop()
+            elif m == "equilibrada":
+
+                k_val = int(self.spin_k.get())
+
+                self._log_msg(
+                    f"Ejecutando Mezcla Equilibrada (K={k_val})..."
+                )
+
+                res, pasos = mezcla_equilibrada_pasos(
+                    self.datos_actuales,
+                    k=k_val
+                )
+
+                for p in pasos:
+
+                    self._dibujar(p[1])
+
+                    self.root.update()
+
+                    time.sleep(delay)
+
+                self.datos_actuales = res
+
+            self._dibujar(
+                self.datos_actuales,
+                listos=list(range(len(self.datos_actuales)))
+            )
+
+            self._log_msg("✅ Ordenamiento finalizado.")
+
+        except Exception as e:
+
+            self._log_msg(f"❌ Error: {e}")
+
+        finally:
+
+            self.animando = False
+
+
+# ==========================================================
+# INICIO
+# ==========================================================
+
+if __name__ == "__main__":
+
+    root = tk.Tk()
+
+    app = OrdenamientoApp(root)
+
+    root.mainloop()
